@@ -1,1 +1,1 @@
-# MonoCloud Base Library for SDKs.
+# MonoCloud SDK Javascript Core Library
