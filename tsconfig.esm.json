@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "es2020"
+    ],
+    "target": "esnext",
+    "module": "esnext",
+    "outDir": "dist/esm",
+    "noEmit": false,
+  },
+  "include": [
+    "src"
+  ]
+}

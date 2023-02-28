@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "module": "commonjs",
+    "lib": [
+      "es2015"
+    ],
+    "alwaysStrict": true,
+    "preserveConstEnums": true,
+    "target": "ES2015",
+    "declaration": true,
+    "downlevelIteration": true,
+    "noEmit": true,
+    "types": [
+      "node",
+    ],
+  },
+  "exclude": [
+    "dist",
+    "node_modules",
+    ".yarn"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}
