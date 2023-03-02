@@ -11,7 +11,9 @@ import { ModelStateError, ModelStateException } from './model-state-exception';
 import { ConflictException } from './conflict-exception';
 
 export class MonoCloudException extends Error {
-  constructor(public readonly message: string) {
+  constructor(message: string);
+  constructor(message: string, raw: any);
+  constructor(public readonly message: string, public readonly raw?: any) {
     super();
   }
 
