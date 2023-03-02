@@ -64,7 +64,7 @@ export abstract class MonoCloudClientBase {
       if (e instanceof AxiosError) {
         MonoCloudException.throwErr(e.response);
       }
-      throw new MonoCloudException('Something went wrong.');
+      throw new MonoCloudException('Something went wrong.', e);
     }
   }
 }

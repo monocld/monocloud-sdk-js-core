@@ -11,8 +11,10 @@ import { UnauthorizedException } from './unauthorized-exception';
 import { ModelStateError, ModelStateException } from './model-state-exception';
 import { ConflictException } from './conflict-exception';
 
-export class MonoCloudException extends MonoCloudBaseException {
-  constructor(public readonly message: string) {
+export class MonoCloudException extends Error {
+  constructor(message: string);
+  constructor(message: string, raw: any);
+  constructor(public readonly message: string, public readonly raw?: any) {
     super();
   }
 
