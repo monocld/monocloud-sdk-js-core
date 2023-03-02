@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export class MonoCloudResponse<TResult = any> {
+export class MonoCloudResponse<TResult = unknown> {
   status: number;
 
   headers: { [key: string]: any };

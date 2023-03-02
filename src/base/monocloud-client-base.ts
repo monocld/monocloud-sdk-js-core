@@ -31,8 +31,7 @@ export abstract class MonoCloudClientBase {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected async processRequest<T = any>(
+  protected async processRequest<T = unknown>(
     request: AxiosRequestConfig
   ): Promise<MonoCloudResponse<T>> {
     try {
