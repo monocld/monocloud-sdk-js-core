@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { unflatten } from 'flat';
+import { MonoCloudBaseException } from './monocloud-base-exception';
 import { BadRequestException } from './bad-request-exception';
 import { ResourceExhaustedException } from './resource-exhausted-exception';
 import { ForbiddenException } from './forbidden-exception';
