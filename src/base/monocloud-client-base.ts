@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axiosRetry from 'axios-retry';
 import { MonoCloudConfig } from './monocloud-config';
 import { MonoCloudResponse } from './monocloud-response';
@@ -60,7 +60,7 @@ export abstract class MonoCloudClientBase {
         )
       );
     } catch (e) {
-      if (e instanceof AxiosError) {
+      if (axios.isAxiosError(e) && e.response) {
         MonoCloudException.throwErr(e.response);
       }
       throw new MonoCloudException('Something went wrong.', e);
