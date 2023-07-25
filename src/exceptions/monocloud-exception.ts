@@ -13,7 +13,10 @@ import { ConflictException } from './conflict-exception';
 export class MonoCloudException extends Error {
   constructor(message: string);
   constructor(message: string, raw: any);
-  constructor(public readonly message: string, public readonly raw?: any) {
+  constructor(
+    public readonly message: string,
+    public readonly raw?: any
+  ) {
     super();
   }
 
