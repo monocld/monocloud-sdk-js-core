@@ -1,5 +1,5 @@
 export type MonoCloudConfig = {
-  tenantId: string;
+  domain: string;
   apiKey: string;
   config?: {
     timeout?: number;

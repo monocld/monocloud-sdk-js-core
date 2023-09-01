@@ -7,11 +7,7 @@ import { MonoCloudException } from '../exceptions/monocloud-exception';
 export abstract class MonoCloudClientBase {
   protected instance: AxiosInstance;
 
-  constructor(
-    configuration: MonoCloudConfig,
-    baseUrl?: string,
-    instance?: AxiosInstance
-  ) {
+  constructor(configuration: MonoCloudConfig, instance?: AxiosInstance) {
     if (instance) {
       this.instance = instance;
     } else {
@@ -19,8 +15,8 @@ export abstract class MonoCloudClientBase {
         throw new MonoCloudException('Configuration is required');
       }
 
-      if (!configuration.tenantId) {
-        throw new MonoCloudException('Tenant Id is required');
+      if (!configuration.domain) {
+        throw new MonoCloudException('Tenant Domain is required');
       }
 
       if (!configuration.apiKey) {
@@ -28,13 +24,12 @@ export abstract class MonoCloudClientBase {
       }
 
       const headers: Record<string, string> = {
-        'X-TENANT-ID': configuration.tenantId,
         'X-API-KEY': configuration.apiKey,
         'Content-Type': 'application/json',
       };
 
       const config: AxiosRequestConfig = {
-        baseURL: baseUrl !== undefined && baseUrl !== null ? baseUrl : '',
+        baseURL: `https://${configuration.domain}/api`,
         headers,
         timeout: configuration.config?.timeout ?? 10000,
       };
