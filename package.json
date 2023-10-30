@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/sdk-js-core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "MonoCloud SDK Javascript Core Library",
   "keywords": [
     "monocloud",
@@ -41,7 +41,6 @@
     "flat": "6.0.1"
   },
   "devDependencies": {
-    "@types/flat": "5.0.4",
     "@types/node": "20.8.9",
     "@typescript-eslint/eslint-plugin": "6.9.0",
     "@typescript-eslint/parser": "6.9.0",
