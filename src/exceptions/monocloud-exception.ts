@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { unflatten } from 'flat';
 import { AxiosResponse } from 'axios';
 import { BadRequestException } from './bad-request-exception';
 import { ResourceExhaustedException } from './resource-exhausted-exception';
@@ -9,6 +8,7 @@ import { NotFoundException } from './not-found-exception';
 import { UnauthorizedException } from './unauthorized-exception';
 import { ModelStateError, ModelStateException } from './model-state-exception';
 import { ConflictException } from './conflict-exception';
+import { unflatten } from './helper';
 
 export class MonoCloudException extends Error {
   constructor(message: string);
