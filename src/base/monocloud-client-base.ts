@@ -29,7 +29,9 @@ export abstract class MonoCloudClientBase {
       };
 
       const config: AxiosRequestConfig = {
-        baseURL: `https://${configuration.domain}/api`,
+        baseURL: configuration.domain.startsWith('https://')
+          ? `${configuration.domain}/api`
+          : `https://${configuration.domain}/api`,
         headers,
         timeout: configuration.config?.timeout ?? 10000,
       };
