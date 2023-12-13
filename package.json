@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/sdk-js-core",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "MonoCloud SDK Javascript Core Library",
   "keywords": [
     "monocloud",

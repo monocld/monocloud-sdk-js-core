@@ -29,9 +29,7 @@ export abstract class MonoCloudClientBase {
       };
 
       const config: AxiosRequestConfig = {
-        baseURL: configuration.domain.startsWith('https://')
-          ? `${configuration.domain}/api`
-          : `https://${configuration.domain}/api`,
+        baseURL: `${this.sanitizeUrl(configuration.domain)}/api`,
         headers,
         timeout: configuration.config?.timeout ?? 10000,
       };
@@ -62,5 +60,19 @@ export abstract class MonoCloudClientBase {
       }
       throw new MonoCloudException('Something went wrong.', e);
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private sanitizeUrl(url: string): string {
+    let u = url;
+    if (!u.startsWith('https://')) {
+      u = `https://${u}`;
+    }
+
+    if (u.endsWith('/')) {
+      u = u.substring(0, u.length - 1);
+    }
+
+    return u;
   }
 }
