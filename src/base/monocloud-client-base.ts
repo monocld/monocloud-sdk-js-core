@@ -1,8 +1,15 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponseHeaders,
+  RawAxiosResponseHeaders,
+} from 'axios';
 import axiosRetry from 'axios-retry';
 import { MonoCloudConfig } from './monocloud-config';
 import { MonoCloudResponse } from './monocloud-response';
 import { MonoCloudException } from '../exceptions/monocloud-exception';
+import { MonoCloudPageResponse } from '../models/monocloud-page-response';
+import { PageModel } from '../models/page-model';
 
 export abstract class MonoCloudClientBase {
   protected instance: AxiosInstance;
@@ -62,6 +69,28 @@ export abstract class MonoCloudClientBase {
     }
   }
 
+  protected async processPaginatedRequest<T = unknown>(
+    request: AxiosRequestConfig
+  ): Promise<MonoCloudPageResponse<T>> {
+    try {
+      const response = await this.instance.request(request);
+      const paginationData = this.resolvePaginationHeader(response.headers);
+      return await Promise.resolve(
+        new MonoCloudPageResponse<T>(
+          response.status,
+          response.headers,
+          response.data ?? null,
+          paginationData
+        )
+      );
+    } catch (e) {
+      if (axios.isAxiosError(e) && e.response) {
+        MonoCloudException.throwErr(e.response);
+      }
+      throw new MonoCloudException('Something went wrong.', e);
+    }
+  }
+
   // eslint-disable-next-line class-methods-use-this
   private sanitizeUrl(url: string): string {
     let u = url;
@@ -74,5 +103,26 @@ export abstract class MonoCloudClientBase {
     }
 
     return u;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private resolvePaginationHeader(
+    headers: RawAxiosResponseHeaders | AxiosResponseHeaders
+  ): PageModel {
+    const pageData = headers['x-pagination']
+      ? JSON.parse(headers['x-pagination'])
+      : undefined;
+    const pageSize = pageData?.page_size ?? 0;
+    const currentPage = pageData?.current_page ?? 0;
+    const totalCount = pageData?.total_count ?? 0;
+    const hasPrevious = pageData?.has_previous ?? false;
+    const hasNext = pageData?.has_next ?? false;
+    return new PageModel(
+      pageSize,
+      currentPage,
+      totalCount,
+      hasPrevious,
+      hasNext
+    );
   }
 }

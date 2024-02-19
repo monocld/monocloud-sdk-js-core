@@ -9,7 +9,8 @@ export { ServerErrorException } from './exceptions/server-error-exception';
 export { UnauthorizedException } from './exceptions/unauthorized-exception';
 
 export { MonoCloudClientBase } from './base/monocloud-client-base';
-export { MonoCloudResponse } from './base/monocloud-response';
+export { MonoCloudResponse } from './models/monocloud-response';
+export { MonoCloudPageResponse } from './models/monocloud-page-response';
 
 export type { ModelStateError } from './exceptions/model-state-exception';
 export type { MonoCloudConfig } from './base/monocloud-config';
