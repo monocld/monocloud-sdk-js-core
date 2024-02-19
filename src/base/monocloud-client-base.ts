@@ -1,15 +1,21 @@
 import axios, {
   AxiosInstance,
   AxiosRequestConfig,
+  AxiosResponse,
   AxiosResponseHeaders,
   RawAxiosResponseHeaders,
 } from 'axios';
 import axiosRetry from 'axios-retry';
 import { MonoCloudConfig } from './monocloud-config';
-import { MonoCloudResponse } from './monocloud-response';
+import { MonoCloudResponse } from '../models/monocloud-response';
 import { MonoCloudException } from '../exceptions/monocloud-exception';
 import { MonoCloudPageResponse } from '../models/monocloud-page-response';
 import { PageModel } from '../models/page-model';
+import { ProblemDetails } from '../models/problem-details';
+import { ValidationExceptionTypes } from '../exceptions/validation-exception-types';
+import { ErrorCodeValidationProblemDetails } from '../models/error-code-validation-problem-details';
+import { KeyValidationProblemDetails } from '../models/key-validation-problem-details';
+import { MonoCloudExceptionHandler } from '../exceptions/monocloud-exception-handler';
 
 export abstract class MonoCloudClientBase {
   protected instance: AxiosInstance;
@@ -63,9 +69,9 @@ export abstract class MonoCloudClientBase {
       );
     } catch (e) {
       if (axios.isAxiosError(e) && e.response) {
-        MonoCloudException.throwErr(e.response);
+        this.HandleErrorResponse(e.response);
       }
-      throw new MonoCloudException('Something went wrong.', e);
+      throw new MonoCloudException('Something went wrong.');
     }
   }
 
@@ -85,10 +91,43 @@ export abstract class MonoCloudClientBase {
       );
     } catch (e) {
       if (axios.isAxiosError(e) && e.response) {
-        MonoCloudException.throwErr(e.response);
+        this.HandleErrorResponse(e.response);
       }
-      throw new MonoCloudException('Something went wrong.', e);
+      throw new MonoCloudException('Something went wrong.');
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private HandleErrorResponse(response: AxiosResponse): void {
+    if (
+      response.headers['Content-Type'] === 'application/problem+json' ||
+      response.headers['content-type'] === 'application/problem+json'
+    ) {
+      let result = response.data
+        ? new ProblemDetails(response.data)
+        : undefined;
+
+      if (result?.type === ValidationExceptionTypes.IdentityValidationError) {
+        result = new ErrorCodeValidationProblemDetails(result);
+      }
+
+      if (result?.type === ValidationExceptionTypes.ValidationError) {
+        result = new KeyValidationProblemDetails(result);
+      }
+
+      if (!result) {
+        throw new MonoCloudException('Invalid body');
+      }
+
+      MonoCloudExceptionHandler.ThrowProblemErr(result);
+    }
+
+    MonoCloudExceptionHandler.ThrowErr(
+      response.status,
+      response.data && response.data !== ''
+        ? response.data
+        : response.statusText
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
