@@ -1,16 +1,23 @@
 export { MonoCloudException } from './exceptions/monocloud-exception';
-export { BadRequestException } from './exceptions/bad-request-exception';
-export { ConflictException } from './exceptions/conflict-exception';
-export { ForbiddenException } from './exceptions/forbidden-exception';
-export { ModelStateException } from './exceptions/model-state-exception';
-export { NotFoundException } from './exceptions/not-found-exception';
-export { ResourceExhaustedException } from './exceptions/resource-exhausted-exception';
-export { ServerErrorException } from './exceptions/server-error-exception';
-export { UnauthorizedException } from './exceptions/unauthorized-exception';
+export { MonoCloudBadRequestException } from './exceptions/monocloud-bad-request-exception';
+export { MonoCloudConflictException } from './exceptions/monocloud-conflict-exception';
+export { MonoCloudErrorCodeValidationException } from './exceptions/monocloud-error-code-validation-exception';
+export { MonoCloudForbiddenException } from './exceptions/monocloud-forbidden-exception';
+export { MonoCloudKeyValidationException } from './exceptions/monocloud-key-validation-exception';
+export { MonoCloudModelStateException } from './exceptions/monocloud-model-state-exception';
+export { MonoCloudNotFoundException } from './exceptions/monocloud-not-found-exception';
+export { MonoCloudRequestException } from './exceptions/monocloud-request-exception';
+export { MonoCloudResourceExhaustedException } from './exceptions/monocloud-resource-exhausted-exception';
+export { MonoCloudServerException } from './exceptions/monocloud-server-exception';
+export { MonoCloudUnauthorizedException } from './exceptions/monocloud-unauthorized-exception';
+
+export { ErrorCodeValidationProblemDetails } from './models/error-code-validation-problem-details';
+export { KeyValidationProblemDetails } from './models/key-validation-problem-details';
+export { ProblemDetails } from './models/problem-details';
 
 export { MonoCloudClientBase } from './base/monocloud-client-base';
 export { MonoCloudResponse } from './models/monocloud-response';
 export { MonoCloudPageResponse } from './models/monocloud-page-response';
 
-export type { ModelStateError } from './exceptions/model-state-exception';
+export type { ErrorCodeValidationError } from './models/error-code-validation-error';
 export type { MonoCloudConfig } from './base/monocloud-config';
