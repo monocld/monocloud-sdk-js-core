@@ -1,6 +1,6 @@
 {
   "name": "@monocloud/sdk-js-core",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "MonoCloud SDK Javascript Core Library",
   "keywords": [
     "monocloud",
@@ -34,10 +34,6 @@
     "lint:es": "eslint src --fix --quiet",
     "lint:ts": "tsc",
     "lint": "npm run lint:es && npm run lint:ts"
-  },
-  "dependencies": {
-    "axios": "1.6.7",
-    "axios-retry": "4.0.0"
   },
   "devDependencies": {
     "@types/node": "20.11.19",

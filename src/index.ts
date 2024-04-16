@@ -21,3 +21,5 @@ export { MonoCloudPageResponse } from './models/monocloud-page-response';
 
 export type { ErrorCodeValidationError } from './models/error-code-validation-error';
 export type { MonoCloudConfig } from './base/monocloud-config';
+export type { Fetcher } from './models/fetcher';
+export type { MonoCloudRequest } from './models/monocloud-request';

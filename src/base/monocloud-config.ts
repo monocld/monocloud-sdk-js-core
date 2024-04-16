@@ -3,6 +3,5 @@ export type MonoCloudConfig = {
   apiKey: string;
   config?: {
     timeout?: number;
-    retry?: boolean;
   };
 };

@@ -1,11 +1,3 @@
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosResponseHeaders,
-  RawAxiosResponseHeaders,
-} from 'axios';
-import axiosRetry from 'axios-retry';
 import { MonoCloudConfig } from './monocloud-config';
 import { MonoCloudResponse } from '../models/monocloud-response';
 import { MonoCloudException } from '../exceptions/monocloud-exception';
@@ -16,13 +8,15 @@ import { ValidationExceptionTypes } from '../exceptions/validation-exception-typ
 import { ErrorCodeValidationProblemDetails } from '../models/error-code-validation-problem-details';
 import { KeyValidationProblemDetails } from '../models/key-validation-problem-details';
 import { MonoCloudExceptionHandler } from '../exceptions/monocloud-exception-handler';
+import { MonoCloudRequest } from '../models/monocloud-request';
+import { Fetcher } from '../models/fetcher';
 
 export abstract class MonoCloudClientBase {
-  protected instance: AxiosInstance;
+  protected fetcher: Fetcher;
 
-  constructor(configuration: MonoCloudConfig, instance?: AxiosInstance) {
-    if (instance) {
-      this.instance = instance;
+  constructor(configuration: MonoCloudConfig, fetcher?: Fetcher) {
+    if (fetcher) {
+      this.fetcher = fetcher;
     } else {
       if (!configuration) {
         throw new MonoCloudException('Configuration is required');
@@ -41,70 +35,103 @@ export abstract class MonoCloudClientBase {
         'Content-Type': 'application/json',
       };
 
-      const config: AxiosRequestConfig = {
-        baseURL: `${this.sanitizeUrl(configuration.domain)}/api`,
-        headers,
-        timeout: configuration.config?.timeout ?? 10000,
+      const baseUrl = `${this.sanitizeUrl(configuration.domain)}/api/`;
+
+      this.fetcher = async (
+        input: string | URL | globalThis.Request,
+        init?: RequestInit
+      ): Promise<Response> => {
+        const url = new URL(input, baseUrl);
+
+        const signal = AbortSignal.timeout(
+          configuration.config?.timeout ?? 10000
+        );
+        signal.throwIfAborted();
+
+        const resp = await fetch(url.toString(), { ...init, headers, signal });
+
+        return resp;
       };
-
-      this.instance = axios.create(config);
-
-      if (configuration.config?.retry === true) {
-        axiosRetry(this.instance, { retries: 3 });
-      }
     }
   }
 
   protected async processRequest<T = unknown>(
-    request: AxiosRequestConfig
+    request: MonoCloudRequest
   ): Promise<MonoCloudResponse<T>> {
     try {
-      const response = await this.instance.request(request);
-      return await Promise.resolve(
-        new MonoCloudResponse<T>(
-          response.status,
-          response.headers,
-          response.data ?? null
-        )
-      );
-    } catch (e) {
-      if (axios.isAxiosError(e) && e.response) {
-        this.HandleErrorResponse(e.response);
+      const url = this.buildUrl(request.url, request.queryParams);
+
+      const response = await this.fetcher(url, {
+        method: request.method,
+        body: request.body ? JSON.stringify(request.body) : undefined,
+      });
+
+      if (!response.ok) {
+        await this.HandleErrorResponse(response);
       }
+
+      return new MonoCloudResponse<T>(
+        response.status,
+        response.headers,
+        (await response.json()) as T
+      );
+    } catch (e: any) {
+      console.error(e);
+      if (e instanceof MonoCloudException) {
+        throw e;
+      }
+
+      if (e.name === 'TimeoutError') {
+        throw new MonoCloudException(e.message);
+      }
+
       throw new MonoCloudException('Something went wrong.');
     }
   }
 
   protected async processPaginatedRequest<T = unknown>(
-    request: AxiosRequestConfig
+    request: MonoCloudRequest
   ): Promise<MonoCloudPageResponse<T>> {
     try {
-      const response = await this.instance.request(request);
-      const paginationData = this.resolvePaginationHeader(response.headers);
-      return await Promise.resolve(
-        new MonoCloudPageResponse<T>(
-          response.status,
-          response.headers,
-          response.data ?? null,
-          paginationData
-        )
-      );
-    } catch (e) {
-      if (axios.isAxiosError(e) && e.response) {
-        this.HandleErrorResponse(e.response);
+      const url = this.buildUrl(request.url, request.queryParams);
+
+      const response = await this.fetcher(url, {
+        method: request.method,
+        body: request.body ? JSON.stringify(request.body) : undefined,
+      });
+
+      if (!response.ok) {
+        await this.HandleErrorResponse(response);
       }
+
+      const paginationData = this.resolvePaginationHeader(response.headers);
+
+      return new MonoCloudPageResponse<T>(
+        response.status,
+        response.headers,
+        (await response.json()) as T,
+        paginationData
+      );
+    } catch (e: any) {
+      if (e instanceof MonoCloudException) {
+        throw e;
+      }
+
+      if (e.name === 'TimeoutError') {
+        throw new MonoCloudException(e.message);
+      }
+
       throw new MonoCloudException('Something went wrong.');
     }
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private HandleErrorResponse(response: AxiosResponse): void {
-    if (
-      response.headers['Content-Type'] === 'application/problem+json' ||
-      response.headers['content-type'] === 'application/problem+json'
-    ) {
-      let result = response.data
-        ? new ProblemDetails(response.data)
+  private async HandleErrorResponse(response: Response): Promise<void> {
+    const contentType = response.headers.get('content-type');
+    if (contentType === 'application/problem+json') {
+      const body = await response.json();
+      let result = body
+        ? new ProblemDetails(body as ProblemDetails)
         : undefined;
 
       if (result?.type === ValidationExceptionTypes.IdentityValidationError) {
@@ -122,11 +149,10 @@ export abstract class MonoCloudClientBase {
       MonoCloudExceptionHandler.ThrowProblemErr(result);
     }
 
+    const respStrng = await response.text();
     MonoCloudExceptionHandler.ThrowErr(
       response.status,
-      response.data && response.data !== ''
-        ? response.data
-        : response.statusText
+      respStrng && respStrng !== '' ? respStrng : response.statusText
     );
   }
 
@@ -145,23 +171,44 @@ export abstract class MonoCloudClientBase {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private resolvePaginationHeader(
-    headers: RawAxiosResponseHeaders | AxiosResponseHeaders
-  ): PageModel {
-    const pageData = headers['x-pagination']
-      ? JSON.parse(headers['x-pagination'])
+  private resolvePaginationHeader(headers: Headers): PageModel {
+    const paginationHeader = headers.get('x-pagination');
+    const pageData = paginationHeader
+      ? JSON.parse(paginationHeader)
       : undefined;
-    const pageSize = pageData?.page_size ?? 0;
-    const currentPage = pageData?.current_page ?? 0;
-    const totalCount = pageData?.total_count ?? 0;
-    const hasPrevious = pageData?.has_previous ?? false;
-    const hasNext = pageData?.has_next ?? false;
-    return new PageModel(
-      pageSize,
-      currentPage,
-      totalCount,
-      hasPrevious,
-      hasNext
-    );
+
+    return {
+      page_size: pageData?.page_size ?? 0,
+      current_page: pageData?.current_page ?? 0,
+      total_count: pageData?.total_count ?? 0,
+      has_previous: pageData?.has_previous ?? false,
+      has_next: pageData?.has_next ?? false,
+    };
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private buildUrl(
+    url: string,
+    queryParams?: Record<string, string | number | boolean>
+  ): string {
+    let urlStr = url;
+
+    if (urlStr.startsWith('/')) {
+      urlStr = urlStr.substring(1, urlStr.length);
+    }
+
+    if (!queryParams) {
+      return urlStr;
+    }
+
+    urlStr += '?';
+
+    Object.keys(queryParams).forEach(key => {
+      urlStr += `${key}=${encodeURIComponent(queryParams[key])}&`;
+    });
+
+    urlStr = urlStr.substring(0, urlStr.length - 1);
+
+    return urlStr;
   }
 }

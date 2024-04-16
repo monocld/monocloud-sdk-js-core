@@ -1,4 +1,4 @@
-export class PageModel {
+export interface PageModel {
   /// <summary>
   /// Page Size
   /// </summary>
@@ -23,18 +23,4 @@ export class PageModel {
   /// Specfies whether there is a next page
   /// </summary>
   has_next: boolean;
-
-  constructor(
-    page_size: number,
-    current_page: number,
-    total_count: number,
-    has_previous: boolean,
-    has_next: boolean
-  ) {
-    this.page_size = page_size;
-    this.current_page = current_page;
-    this.total_count = total_count;
-    this.has_previous = has_previous;
-    this.has_next = has_next;
-  }
 }
