@@ -76,7 +76,6 @@ export abstract class MonoCloudClientBase {
         (await response.json()) as T
       );
     } catch (e: any) {
-      console.error(e);
       if (e instanceof MonoCloudException) {
         throw e;
       }
