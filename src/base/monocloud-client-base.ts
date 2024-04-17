@@ -73,8 +73,9 @@ export abstract class MonoCloudClientBase {
       return new MonoCloudResponse<T>(
         response.status,
         response.headers,
-        (await response.json()) as T
+        (response.body ? await response.json() : null) as T
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       if (e instanceof MonoCloudException) {
         throw e;
@@ -108,9 +109,10 @@ export abstract class MonoCloudClientBase {
       return new MonoCloudPageResponse<T>(
         response.status,
         response.headers,
-        (await response.json()) as T,
+        (response.body ? await response.json() : null) as T,
         paginationData
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       if (e instanceof MonoCloudException) {
         throw e;
@@ -127,7 +129,7 @@ export abstract class MonoCloudClientBase {
   // eslint-disable-next-line class-methods-use-this
   private async HandleErrorResponse(response: Response): Promise<void> {
     const contentType = response.headers.get('content-type');
-    if (contentType === 'application/problem+json') {
+    if (contentType?.startsWith('application/problem+json')) {
       const body = await response.json();
       let result = body
         ? new ProblemDetails(body as ProblemDetails)
