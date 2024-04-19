@@ -70,9 +70,13 @@ export abstract class MonoCloudClientBase {
         await this.HandleErrorResponse(response);
       }
 
+      const headers: Record<string, any> = {}; 
+
+      response.headers.forEach((value, key) => { headers[key] = value });
+
       return new MonoCloudResponse<T>(
         response.status,
-        response.headers,
+        headers,
         (response.body ? await response.json() : null) as T
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,11 +108,15 @@ export abstract class MonoCloudClientBase {
         await this.HandleErrorResponse(response);
       }
 
+      const headers: Record<string, any> = {}; 
+
+      response.headers.forEach((value, key) => { headers[key] = value });
+
       const paginationData = this.resolvePaginationHeader(response.headers);
 
       return new MonoCloudPageResponse<T>(
         response.status,
-        response.headers,
+        headers,
         (response.body ? await response.json() : null) as T,
         paginationData
       );
