@@ -70,9 +70,11 @@ export abstract class MonoCloudClientBase {
         await this.HandleErrorResponse(response);
       }
 
-      const headers: Record<string, any> = {}; 
+      const headers: Record<string, any> = {};
 
-      response.headers.forEach((value, key) => { headers[key] = value });
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
 
       return new MonoCloudResponse<T>(
         response.status,
@@ -108,9 +110,11 @@ export abstract class MonoCloudClientBase {
         await this.HandleErrorResponse(response);
       }
 
-      const headers: Record<string, any> = {}; 
+      const headers: Record<string, any> = {};
 
-      response.headers.forEach((value, key) => { headers[key] = value });
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
 
       const paginationData = this.resolvePaginationHeader(response.headers);
 
