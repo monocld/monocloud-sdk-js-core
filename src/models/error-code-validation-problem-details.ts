@@ -7,7 +7,7 @@ export class ErrorCodeValidationProblemDetails extends ProblemDetails {
   constructor(response: ProblemDetails) {
     super(response);
     this.errors = (response.errors as ErrorCodeValidationError[]).map(
-      err => new ErrorCodeValidationError(err.code, err.description)
+      err => new ErrorCodeValidationError(err.code, err.description, err.field)
     );
   }
 }

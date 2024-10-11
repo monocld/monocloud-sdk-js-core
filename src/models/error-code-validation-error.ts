@@ -9,8 +9,14 @@ export class ErrorCodeValidationError {
   /// </summary>
   description: string;
 
-  constructor(code: string, description: string) {
+  /// <summary>
+  /// The field the error belongs to.
+  /// </summary>
+  field?: string;
+
+  constructor(code: string, description: string, field?: string) {
     this.code = code;
     this.description = description;
+    this.field = field;
   }
 }
