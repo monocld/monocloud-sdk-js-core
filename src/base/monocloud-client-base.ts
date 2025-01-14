@@ -76,10 +76,12 @@ export abstract class MonoCloudClientBase {
         headers[key] = value;
       });
 
+      const resp = response.body ? await response.text() : null;
+
       return new MonoCloudResponse<T>(
         response.status,
         headers,
-        (response.body ? await response.json() : null) as T
+        (resp?.length ? JSON.parse(resp) : null) as T
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
